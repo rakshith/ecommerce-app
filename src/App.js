@@ -1,19 +1,23 @@
-import React, { useEffect } from "react";
+import { GlobalStyle } from "./gobal.styles";
 // import "./App.css";
 
-import HomePage from "./pages/homepage/homepage.component";
+import React, { useEffect, lazy, Suspense } from "react";
 import { Switch, Route, Redirect } from "react-router-dom";
-import ShopPage from "./pages/shop/shop.component";
-import Header from "./components/header/header.component";
-import SignInAndSignUpComponent from "./pages/sign-in-and-sign-up-page/sign-in-and-sign-up.component";
-
 import { connect } from "react-redux";
 import { createStructuredSelector } from "reselect";
 
+import Header from "./components/header/header.component";
+
 import { selectCurrentUser } from "./redux/user/user.selectors";
 import { checkUserSession } from "./redux/user/user.actions";
-import CheckoutPage from "./pages/checkout/checkout.component";
-import { GlobalStyle } from "./gobal.styles";
+import Spinner from "./components/spinner/spinner.component";
+
+const HomePage = lazy(() => import("./pages/homepage/homepage.component"));
+const ShopPage = lazy(() => import("./pages/shop/shop.component"));
+const SignInAndSignUpComponent = lazy(() =>
+  import("./pages/sign-in-and-sign-up-page/sign-in-and-sign-up.component")
+);
+const CheckoutPage = lazy(() => import("./pages/checkout/checkout.component"));
 
 const App = ({ checkUserSession, currentUser }) => {
   useEffect(() => {
@@ -25,17 +29,18 @@ const App = ({ checkUserSession, currentUser }) => {
       <GlobalStyle />
       <Header />
       <Switch>
-        <Route exact path="/" component={HomePage} />
-        <Route path="/shop" component={ShopPage} />
-        <Route
-          exact
-          path="/signin"
-          render={() =>
-            currentUser ? <Redirect to="/" /> : <SignInAndSignUpComponent />
-          }
-        />
-
-        <Route path="/checkout" component={CheckoutPage} />
+        <Suspense fallback={<Spinner />}>
+          <Route exact path="/" component={HomePage} />
+          <Route path="/shop" component={ShopPage} />
+          <Route
+            exact
+            path="/signin"
+            render={() =>
+              currentUser ? <Redirect to="/" /> : <SignInAndSignUpComponent />
+            }
+          />
+          <Route path="/checkout" component={CheckoutPage} />
+        </Suspense>
       </Switch>
     </div>
   );
